@@ -35,7 +35,7 @@ class DataManager(DataLoader):
             self.config.ast_feature_extractor_id
         )
         dataset = dataset.map(
-            self._parse_audio_as_mel_spectogram,
+            self._parse_audio_as_mel_spectrogram,
             batched=True,
             fn_kwargs={'ast_feature_extractor': ast_feature_extractor},
             remove_columns=['audio']
@@ -48,7 +48,7 @@ class DataManager(DataLoader):
         )
         return example
 
-    def _parse_audio_as_mel_spectogram(self, examples, ast_feature_extractor):
+    def _parse_audio_as_mel_spectrogram(self, examples, ast_feature_extractor):
         audios_to_process = []
         # 10 seconds at audio_sampling_rate Hz
         target_samples = self.config.audio_sampling_rate * \
@@ -64,5 +64,5 @@ class DataManager(DataLoader):
             sampling_rate=self.config.audio_sampling_rate,
             return_tensors='pt',
             padding='max_length',
-            max_length=self.config.max_time_frames_in_spectogram,
+            max_length=self.config.max_time_frames_in_spectrogram,
         )
