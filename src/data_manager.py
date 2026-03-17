@@ -1,3 +1,5 @@
+import random
+
 from typing import cast, Any
 from pathlib import Path
 
@@ -47,8 +49,20 @@ class DataManager(DataLoader):
         return example
 
     def _parse_audio_as_mel_spectogram(self, examples, ast_feature_extractor):
+        audios_to_process = []
+        # 10 seconds at audio_sampling_rate Hz
+        target_samples = self.config.audio_sampling_rate * \
+            self.config.audio_seconds_to_sample
+        for audio_array in [example['array'] for example in examples['audio']]:
+            if len(audio_array) > target_samples:
+                start = random.randint(0, len(audio_array) - target_samples)
+                audio_array = audio_array[start: start + target_samples]
+            audios_to_process.append(audio_array)
+
         return ast_feature_extractor(
-            [example['array'] for example in examples['audio']],
+            audios_to_process,
             sampling_rate=self.config.audio_sampling_rate,
-            return_tensors='pt'
+            return_tensors='pt',
+            padding='max_length',
+            max_length=self.config.max_time_frames_in_spectogram,
         )
