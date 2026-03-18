@@ -1,13 +1,13 @@
 class Config:
     seed = 11
     test_size = 0.1
-    dataset_sample_size = 0.001
-    epochs = 10
+    dataset_sample_size = 0.04
+    epochs = 1
     batch_size = 16
-    warmup_ratio = 0.1
+    warmup_steps = 0.1
     checkpoint_folder = 'data/checkpoints'
-    dataset_file_path = 'data/train.csv'
-    audio_data_folder = 'data/train_audio'
+    dataset_file_path = 'data/train_soundscapes_labels.csv'
+    audio_data_folder = 'data/train_soundscapes'
     ast_feature_extractor_id = 'MIT/ast-finetuned-audioset-10-10-0.4593'
     audio_sampling_rate = 16_000
     audio_seconds_to_sample = 10

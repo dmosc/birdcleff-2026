@@ -1,4 +1,5 @@
 import random
+import numpy as np
 
 from typing import cast, Any
 
@@ -37,6 +38,11 @@ class DataManager(DataLoader):
         return len(self.label_to_id.keys())
 
     def _get_label_maps(self, dataset):
+        all_labels = []
+
+        for label in dataset['primary_label']:
+            all_labels.extend(label.split(';'))
+
         unique_labels = sorted(list(set(dataset['primary_label'])))
         label_to_id = {label: id for id, label in enumerate(unique_labels)}
         id_to_label = {id: label for id, label in enumerate(unique_labels)}
@@ -66,7 +72,14 @@ class DataManager(DataLoader):
         return dataset
 
     def _rename_label_column(self, example):
-        example['labels'] = self.label_to_id[example['primary_label']]
+        num_classes = self.get_num_unique_labels()
+        multi_hot_encoding = np.zeros(num_classes, dtype=np.float32)
+
+        for label in example['primary_label'].split(';'):
+            if label in self.label_to_id:
+                multi_hot_encoding[self.label_to_id[label]] = 1.0
+
+        example['labels'] = multi_hot_encoding
         return example
 
     def _add_audio_path(self, example):
