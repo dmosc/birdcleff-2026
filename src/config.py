@@ -1,8 +1,8 @@
 class Config:
     seed = 11
     test_size = 0.1
-    dataset_sample_size = 0.04
-    epochs = 1
+    dataset_sample_size = 1
+    epochs = 10
     batch_size = 16
     warmup_steps = 0.1
     checkpoint_folder = 'data/checkpoints'
