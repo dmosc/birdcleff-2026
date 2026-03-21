@@ -86,7 +86,7 @@ class DataManager(DataLoader):
         ast_feature_extractor = ASTFeatureExtractor.from_pretrained(
             self.config.ast_feature_extractor_id
         )
-        columns_to_remove = [
+        remove_columns = [
             column for column in dataset.column_names
             if column not in self.config.columns_to_keep
         ]
@@ -95,7 +95,7 @@ class DataManager(DataLoader):
             batched=True,
             batch_size=self.config.batch_size,
             fn_kwargs={'ast_feature_extractor': ast_feature_extractor},
-            remove_columns=columns_to_remove,
+            remove_columns=remove_columns,
         )
         return dataset
 
