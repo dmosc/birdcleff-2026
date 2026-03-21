@@ -51,6 +51,8 @@ class DataManager(DataLoader):
             audio_samples.numpy(),
             sampling_rate=self.config.audio_sampling_rate,
             return_tensors='pt',
+            padding='max_length',
+            truncation=True,
             max_length=self.config.max_time_frames_in_spectrogram,
         )
         return inputs['input_values']
@@ -152,6 +154,8 @@ class DataManager(DataLoader):
             audios_to_process,
             sampling_rate=self.config.audio_sampling_rate,
             return_tensors='pt',
+            padding='max_length',
+            truncation=True,
             max_length=self.config.max_time_frames_in_spectrogram,
         )
         return {
