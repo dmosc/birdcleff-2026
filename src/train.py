@@ -1,3 +1,5 @@
+import numpy as np
+
 from transformers import (
     ASTForAudioClassification,
     TrainingArguments,
@@ -6,29 +8,52 @@ from transformers import (
     EvalPrediction
 )
 from scipy.special import expit
-from sklearn.metrics import f1_score, recall_score, precision_score
+from sklearn.metrics import (
+    average_precision_score,
+    label_ranking_average_precision_score,
+    f1_score
+)
 
 from src.data_manager import DataManager
 from src.config import Config
 
 
 def compute_metrics(eval_predictions: EvalPrediction):
-    logits, labels = eval_predictions
-    probabilities = expit(logits)
-    predictions = (probabilities > 0.5).astype(float)
+    print(eval_predictions)
+    predictions = np.array(eval_predictions.predictions)
+    labels = np.array(eval_predictions.label_ids).astype(np.float32)
+    probabilities = expit(predictions)
+    # Measures global ranking quality.
+    mean_average_precision = average_precision_score(
+        labels,
+        probabilities,
+        average='macro'
+    )
+    # Measures per-sample ranking quality.
+    label_ranking_average_precision = label_ranking_average_precision_score(
+        labels,
+        probabilities
+    )
+    # F1-score derived from an explicit 20% confidence threshold in predictions.
+    predictions = (probabilities > 0.2).astype(float)
+    f1 = f1_score(labels, predictions, average='macro', zero_division=0)
+    # Measures if the "most" confident prediction is right.
+    top_idxs = np.argmax(probabilities, axis=1)
+    top1_matches = labels[np.arange(len(labels)), top_idxs]
+    top1_accuracy = np.mean(top1_matches)
+    # Measures how confident on average is the top predictions.
+    mean_max_confidence = np.mean(np.max(probabilities, axis=1))
     return {
-        'f1': f1_score(labels, predictions, average='macro'),
-        'precision': precision_score(
-            labels, predictions, average='macro', zero_division=0
-        ),
-        'recall': recall_score(
-            labels, predictions, average='macro', zero_division=0
-        ),
-        'accuracy': (predictions == labels).mean()
+        'mean_average_precision': mean_average_precision,
+        'label_ranking_average_precision': label_ranking_average_precision,
+        'f1': f1,
+        'top1_accuracy': top1_accuracy,
+        'mean_max_confidence': mean_max_confidence
     }
 
 
 def main():
+    print('Setting up training...')
     config = Config()
     data_manager = DataManager(config)
     train_dataset, test_dataset = data_manager.get_dataset_splits()
