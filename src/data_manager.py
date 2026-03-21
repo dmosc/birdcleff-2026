@@ -43,7 +43,7 @@ class DataManager(DataLoader):
         for label in dataset['primary_label']:
             all_labels.extend(label.split(';'))
 
-        unique_labels = sorted(list(set(dataset['primary_label'])))
+        unique_labels = sorted(list(set(all_labels)))
         label_to_id = {label: id for id, label in enumerate(unique_labels)}
         id_to_label = {id: label for id, label in enumerate(unique_labels)}
         return label_to_id, id_to_label
