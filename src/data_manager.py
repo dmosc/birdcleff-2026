@@ -121,12 +121,32 @@ class DataManager(DataLoader):
             self.config.audio_seconds_to_sample
         audios_to_process = []
 
-        for audio_data in examples['audio']:
+        for idx, audio_data in enumerate(examples['audio']):
             audio_array = audio_data['array']
-            if len(audio_array) > target_samples:
-                start = random.randint(0, len(audio_array) - target_samples)
-                audio_array = audio_array[start: start + target_samples]
-            audios_to_process.append(audio_array)
+
+            def _to_secs(timemstap: str):
+                hours, minutes, seconds = map(int, timemstap.split(':'))
+                return hours * 3600 + minutes * 60 + seconds
+
+            segment_start_idx = int(
+                _to_secs(examples['start'][idx]) *
+                self.config.audio_sampling_rate
+            )
+            segment_end_idx = int(
+                _to_secs(examples['end'][idx]) *
+                self.config.audio_sampling_rate
+            )
+            audio_segment_array = audio_array[segment_start_idx:segment_end_idx]
+
+            if len(audio_segment_array) > target_samples:
+                start_offset = random.randint(
+                    0, len(audio_segment_array) - target_samples
+                )
+                audio_segment_array = audio_segment_array[
+                    start_offset:start_offset + target_samples
+                ]
+
+            audios_to_process.append(audio_segment_array)
 
         inputs = ast_feature_extractor(
             audios_to_process,
