@@ -1,4 +1,5 @@
 import random
+import torch
 import numpy as np
 
 from typing import cast, Any
@@ -6,6 +7,7 @@ from typing import cast, Any
 from datasets import Audio
 from datasets import Dataset as HFDataset
 from torch.utils.data import DataLoader, Dataset as TorchDataset
+from torchcodec.decoders import AudioDecoder
 from transformers import ASTFeatureExtractor
 from src.config import Config
 
@@ -26,6 +28,32 @@ class DataManager(DataLoader):
             shuffle=True
         )
         self.hf_dataset = dataset
+
+    def get_inference_input(
+        self,
+        audio_path: str,
+        start_seconds: float,
+        end_seconds: float
+    ) -> torch.Tensor:
+        audio_decoder = AudioDecoder(
+            audio_path,
+            sample_rate=self.config.audio_sampling_rate
+        )
+        audio_frames = audio_decoder.get_samples_played_in_range(
+            start_seconds,
+            end_seconds,
+        )
+        audio_samples = audio_frames.data.float()
+        ast_feature_extractor = ASTFeatureExtractor.from_pretrained(
+            self.config.ast_feature_extractor_id
+        )
+        inputs = ast_feature_extractor(
+            audio_samples.numpy(),
+            sampling_rate=self.config.audio_sampling_rate,
+            return_tensors='pt',
+            max_length=self.config.max_time_frames_in_spectrogram,
+        )
+        return inputs['input_values']
 
     def get_dataset_splits(self):
         train_test_split = self.hf_dataset.train_test_split(
@@ -104,7 +132,6 @@ class DataManager(DataLoader):
             audios_to_process,
             sampling_rate=self.config.audio_sampling_rate,
             return_tensors='pt',
-            padding='max_length',
             max_length=self.config.max_time_frames_in_spectrogram,
         )
         return {
