@@ -11,5 +11,5 @@ class Config:
     ast_feature_extractor_id = 'MIT/ast-finetuned-audioset-10-10-0.4593'
     audio_sampling_rate = 16_000
     audio_seconds_to_sample = 5
-    max_time_frames_in_spectrogram = 512
+    max_timeframes_in_spectrogram = 512
     columns_to_keep = ['input_values', 'labels']

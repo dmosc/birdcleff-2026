@@ -46,7 +46,7 @@ class DataManager(DataLoader):
         audio_samples = audio_frames.data.float()
         ast_feature_extractor = ASTFeatureExtractor.from_pretrained(
             self.config.ast_feature_extractor_id,
-            max_length=self.config.max_time_frames_in_spectrogram,
+            max_length=self.config.max_timeframes_in_spectrogram,
         )
         inputs = ast_feature_extractor(
             audio_samples.numpy(),
@@ -85,7 +85,7 @@ class DataManager(DataLoader):
         )
         ast_feature_extractor = ASTFeatureExtractor.from_pretrained(
             self.config.ast_feature_extractor_id,
-            max_length=self.config.max_time_frames_in_spectrogram,
+            max_length=self.config.max_timeframes_in_spectrogram,
         )
         remove_columns = [
             column for column in dataset.column_names

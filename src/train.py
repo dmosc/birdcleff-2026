@@ -62,7 +62,7 @@ def main():
         num_labels=data_manager.get_num_unique_labels(),
         label2id=data_manager.label_to_id,
         id2label=data_manager.id_to_label,
-        max_length=config.max_time_frames_in_spectrogram,
+        max_length=config.max_timeframes_in_spectrogram,
         # Use BCEWithLogitsLoss instead of standard Cross Entropy.
         problem_type='multi_label_classification'
     )
