@@ -13,3 +13,8 @@ class Config:
     audio_seconds_to_sample = 5
     max_timeframes_in_spectrogram = 512
     columns_to_keep = ['input_values', 'labels']
+
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
