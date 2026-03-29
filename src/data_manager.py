@@ -75,11 +75,13 @@ class DataManager(DataLoader):
         return len(self.label_to_id.keys())
 
     def _get_label_maps(self, dataset):
-        all_labels = []
-
-        for label in dataset['primary_label']:
-            all_labels.extend(label.split(';'))
-
+        all_labels = np.loadtxt(
+            self.config.taxonomy_file_path,
+            dtype=str,
+            delimiter=',',
+            skiprows=1,
+            usecols=(0,)
+        )
         unique_labels = sorted(list(set(all_labels)))
         label_to_id = {label: id for id, label in enumerate(unique_labels)}
         id_to_label = {id: label for id, label in enumerate(unique_labels)}

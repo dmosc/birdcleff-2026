@@ -7,6 +7,7 @@ class Config:
     warmup_steps = 0.1
     checkpoint_folder = 'data/checkpoints'
     dataset_file_path = 'data/train_soundscapes_labels.csv'
+    taxonomy_file_path = 'data/taxonomy.csv'
     audio_data_folder = 'data/train_soundscapes'
     ast_feature_extractor_id = 'MIT/ast-finetuned-audioset-10-10-0.4593'
     audio_sampling_rate = 16_000
