@@ -33,28 +33,36 @@ class DataManager(DataLoader):
     def get_inference_input(
         config: Config,
         audio_path: str,
-        start_seconds: float,
-        end_seconds: float
+        seconds_per_sample: int
     ) -> torch.Tensor:
         audio_decoder = AudioDecoder(
             audio_path,
             sample_rate=config.audio_sampling_rate
         )
-        audio_frames = audio_decoder.get_samples_played_in_range(
-            start_seconds,
-            end_seconds,
-        )
-        audio_samples = audio_frames.data.float()
         ast_feature_extractor = ASTFeatureExtractor.from_pretrained(
             config.ast_feature_extractor_id,
             max_length=config.max_timeframes_in_spectrogram,
         )
-        inputs = ast_feature_extractor(
-            audio_samples.numpy(),
-            return_tensors='pt',
-            sampling_rate=config.audio_sampling_rate
-        )
-        return inputs['input_values']
+        inputs = []
+        assert audio_decoder.metadata.duration_seconds
+        duration_seconds = int(audio_decoder.metadata.duration_seconds)
+
+        for to_seconds in range(seconds_per_sample, duration_seconds + 1,
+                                seconds_per_sample):
+            from_seconds = to_seconds - seconds_per_sample
+            audio_frames = audio_decoder.get_samples_played_in_range(
+                from_seconds,
+                to_seconds
+            )
+            audio_samples = audio_frames.data.float()
+            sample_input = ast_feature_extractor(
+                audio_samples.numpy(),
+                return_tensors='pt',
+                sampling_rate=config.audio_sampling_rate
+            )
+            inputs.append(sample_input['input_values'])
+
+        return torch.cat(inputs, dim=0)
 
     def get_dataset_splits(self):
         train_test_split = self.hf_dataset.train_test_split(
